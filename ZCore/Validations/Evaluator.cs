@@ -90,7 +90,7 @@ public class Evaluator<TVal, TFld> : IEvaluator<TVal, TFld>, IEquatable<bool>
         {
             _raise = true;
             if (!Util.IsEmpty(message))
-                Validator?.AddMessage(Name, message);
+                Validator?.AddError(Name, message);
         }
 
         return this;
@@ -103,7 +103,7 @@ public class Evaluator<TVal, TFld> : IEvaluator<TVal, TFld>, IEquatable<bool>
         {
             _raise = true;
             if (!Util.IsEmpty(message))
-                Validator?.AddMessage(Name, message);
+                Validator?.AddError(Name, message);
         }
 
         return this;

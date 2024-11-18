@@ -7,6 +7,4 @@ public interface IMomentable
     Epoch CreatedAt { get; set; }
 
     Epoch ModifiedAt { get; set; }
-
-    Epoch RemovedAt { get; set; }
 }

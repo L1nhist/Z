@@ -7,11 +7,20 @@ public class Validator<T> : IValidator<T>
 {
     private T? _current;
 
-    private Dictionary<string, object> _evals = [];
+    private readonly Dictionary<string, object> _evals = [];
 
-    private Dictionary<string, string> _errors { get; } = [];
+    private readonly Dictionary<string, string> _errors = [];
 
-    public void AddMessage(string field, string message)
+    public string ErrorMessage
+    {
+        get
+        {
+            if (_errors.Count == 0) return "";
+            return string.Join(", ", _errors.Select(e => $"{e.Key}: {e.Value}"));
+        }
+    }
+
+    public void AddError(string field, string message)
     {
         if (!Util.IsEmpty(message))
             _errors.Add(field, message);
@@ -37,7 +46,7 @@ public class Validator<T> : IValidator<T>
         _errors.Clear();
         _current = value;
         if (Util.IsEmpty(_current))
-            AddMessage("", "Validated fail with null or empty current value");
+            AddError("", "Validated fail with null or empty current value");
 
         return _errors.Count == 0;
     }

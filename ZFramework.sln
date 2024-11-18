@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Z.Data", "Z.Data\Z.Data.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Z.Services", "Z.Services\Z.Services.csproj", "{A15FA4B0-10D1-4958-A15B-EA87692D3D83}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Z.Auth", "Z.Auth\Z.Auth.csproj", "{92DDC1CE-52BA-4B36-AAA6-FB2CB948B012}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{A15FA4B0-10D1-4958-A15B-EA87692D3D83}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A15FA4B0-10D1-4958-A15B-EA87692D3D83}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A15FA4B0-10D1-4958-A15B-EA87692D3D83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92DDC1CE-52BA-4B36-AAA6-FB2CB948B012}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92DDC1CE-52BA-4B36-AAA6-FB2CB948B012}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92DDC1CE-52BA-4B36-AAA6-FB2CB948B012}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92DDC1CE-52BA-4B36-AAA6-FB2CB948B012}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
