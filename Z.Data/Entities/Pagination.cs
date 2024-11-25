@@ -1,6 +1,4 @@
-﻿using Z.Data.Interfaces;
-
-namespace Z.Data.Entities;
+﻿namespace Z.Data.Entities;
 
 public class Pagination<T> : IPagination, IEnumerable<T>, IEnumerable
 {

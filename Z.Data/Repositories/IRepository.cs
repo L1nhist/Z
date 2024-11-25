@@ -97,7 +97,7 @@ public interface IRepository<TEnt> : IDisposable
     /// </summary>
     /// <param name="ent">Danh sách các giá trị Entity cần thay đổi</param>
     /// <param name="fields">Danh sách các trường dữ liệu cần thay đổi, được viết cách nhau bởi dấu phảy (,) và không phân biệt chữ hoa chữ thường</param>
-    Task<int> UpdateBy(string fields, params object[] values);
+    Task<int> UpdateBy(string field, object value);
 
     /// <summary>
     /// Cập nhật Entity chỉ thay đổi một trường dữ liệu vào Database
@@ -144,6 +144,12 @@ public interface IRepository<TEnt> : IDisposable
     Task<TEnt?> GetFirst();
 
     /// <summary>
+    /// Lấy một Entity theo một câu lệnh tìm kiếm có điều kiện từ Database
+    /// </summary>
+    /// <returns>Giá trị Entity tìm được</returns>
+    Task<TMap?> GetFirst<TMap>();
+
+    /// <summary>
     /// Lấy danh sách phân trang các Entity theo một câu lệnh tìm kiếm có điều kiện từ Database
     /// </summary>
     /// <returns>Danh sách phân trang các Entity tìm được, <seealso cref="IEnumerable{TEnt}"/></returns>
@@ -152,6 +158,18 @@ public interface IRepository<TEnt> : IDisposable
     /// <summary>
     /// Lấy danh sách phân trang các Entity theo một câu lệnh tìm kiếm có điều kiện từ Database
     /// </summary>
+    /// <returns>Danh sách phân trang các Entity tìm được, <seealso cref="IEnumerable{TEnt}"/></returns>
+    Task<List<TMap>> GetList<TMap>(int top = 0);
+
+    /// <summary>
+    /// Lấy danh sách phân trang các Entity theo một câu lệnh tìm kiếm có điều kiện từ Database
+    /// </summary>
     /// <returns>Danh sách phân trang các Entity tìm được, <seealso cref="Pagination{TEnt}"/></returns>
     Task<Pagination<TEnt>> GetPaging(int page = 0, int size = 15);
+
+    /// <summary>
+    /// Lấy danh sách phân trang các Entity theo một câu lệnh tìm kiếm có điều kiện từ Database
+    /// </summary>
+    /// <returns>Danh sách phân trang các Entity tìm được, <seealso cref="Pagination{TEnt}"/></returns>
+    Task<Pagination<TMap>> GetPaging<TMap>(int page = 0, int size = 15);
 }

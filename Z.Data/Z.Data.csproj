@@ -7,19 +7,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.10" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ZCore\ZCore.csproj" />
+    <ProjectReference Include="..\Z.Core\Z.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Using Include="AutoMapper" />
     <Using Include="Microsoft.EntityFrameworkCore" />
     <Using Include="Microsoft.EntityFrameworkCore.Query" />
     <Using Include="System.Collections" />
+    <Using Include="System.ComponentModel.DataAnnotations" />
+    <Using Include="System.Diagnostics.CodeAnalysis" />
     <Using Include="System.Linq.Expressions" />
+    <Using Include="System.Net" />
+    <Using Include="Z.Core.Models" />
+    <Using Include="Z.Core.Structures" />
     <Using Include="Z.Core.Utilities" />
     <Using Include="Z.Data.Entities" />
   </ItemGroup>

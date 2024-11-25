@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Z.Core.StrongTypes;
-
-namespace Z.Data.Entities;
+﻿namespace Z.Data.Entities;
 
 public class Entity<T> : IEntity<T>
 {

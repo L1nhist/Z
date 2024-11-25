@@ -1,39 +1,36 @@
-﻿using System.Reflection;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Z.Core.Extensions;
-using Z.Data.Interfaces;
+using Z.Core.Models;
 
 namespace Z.Data.Repositories;
 
-public class DataRepository<TEnt>(DbContext context) : IRepository<TEnt>
+public class DataRepository<TEnt>(DbContext context, IMapper mapper) : IRepository<TEnt>
     where TEnt : class, IEntity
 {
     #region Properties
     private readonly DbContext _context = context ?? throw new NullReferenceException("DbContext can not be null");
 
+    private readonly IMapper _mapper = mapper;
+
     private IQueryable<TEnt>? _query = null;
     #endregion
 
     #region Privates
-    private static SetPropertyCalls<TEnt> BuildSelector(SetPropertyCalls<TEnt> setter, string fields, params object[] values)
+    private static Expression<Func<TEnt, object>>? BuildSelector(string field, object value)
     {
         try
         {
-            fields = $";{fields};".Replace(" ", "");
-            var properties = typeof(TEnt).GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                            .Where(p => fields.Contains($";{p.Name};", StringComparison.OrdinalIgnoreCase));
+            var prop = typeof(TEnt).GetProperty(field);
+            if (prop == null) return null;
 
-            int idx = -1;
-            foreach (var p in properties)
-            {
-                idx++;
-                var param = Expression.Parameter(typeof(TEnt));
-                var prop = Expression.Convert(Expression.Property(param, p), typeof(object));
-                setter = setter.SetProperty(Expression.Lambda<Func<TEnt, object>>(prop, param).Compile(), idx >= values.Length ? null : values[idx]);
-            }
+            var param = Expression.Parameter(typeof(TEnt));
+            var cast = Expression.Convert(Expression.Property(param, prop), typeof(object));
+            return Expression.Lambda<Func<TEnt, object>>(cast, param);
         }
         catch { }
 
-        return setter;
+        return null;
     }
 
     private IQueryable<TEnt> GetQuery()
@@ -76,7 +73,7 @@ public class DataRepository<TEnt>(DbContext context) : IRepository<TEnt>
     /// <inheritdoc/>
     public IRepository<TEnt> SortBy(params string[] flds)
     {
-		var props = typeof(TEnt).GetProps(flds);
+        var props = typeof(TEnt).GetProps(flds);
         if (Util.IsEmpty(props)) return this;
 
         _query = GetQuery();
@@ -95,7 +92,7 @@ public class DataRepository<TEnt>(DbContext context) : IRepository<TEnt>
             }
         }
 
-		return this;
+        return this;
     }
 
     /// <inheritdoc/>
@@ -131,66 +128,66 @@ public class DataRepository<TEnt>(DbContext context) : IRepository<TEnt>
 
     /// <inheritdoc/>
     public async Task<int> Count()
-		=> EndQuery(await GetQuery().CountAsync());
+        => EndQuery(await GetQuery().CountAsync());
 
     /// <inheritdoc/>
     public async Task<int> Min(Expression<Func<TEnt, int>> selector)
-		=> EndQuery(await GetQuery().MinAsync(selector));
+        => EndQuery(await GetQuery().MinAsync(selector));
 
-	/// <inheritdoc/>
-	public async Task<long> Min(Expression<Func<TEnt, long>> selector)
-		=> EndQuery(await GetQuery().MinAsync(selector));
+    /// <inheritdoc/>
+    public async Task<long> Min(Expression<Func<TEnt, long>> selector)
+        => EndQuery(await GetQuery().MinAsync(selector));
 
-	/// <inheritdoc/>
-	public async Task<double> Min(Expression<Func<TEnt, double>> selector)
-		=> EndQuery(await GetQuery().MinAsync(selector));
+    /// <inheritdoc/>
+    public async Task<double> Min(Expression<Func<TEnt, double>> selector)
+        => EndQuery(await GetQuery().MinAsync(selector));
 
-	/// <inheritdoc/>
-	public async Task<decimal> Min(Expression<Func<TEnt, decimal>> selector)
-		=> EndQuery(await GetQuery().MinAsync(selector));
+    /// <inheritdoc/>
+    public async Task<decimal> Min(Expression<Func<TEnt, decimal>> selector)
+        => EndQuery(await GetQuery().MinAsync(selector));
 
-	/// <inheritdoc/>
-	public async Task<DateTime> Min(Expression<Func<TEnt, DateTime>> selector)
-		=> EndQuery(await GetQuery().MinAsync(selector));
+    /// <inheritdoc/>
+    public async Task<DateTime> Min(Expression<Func<TEnt, DateTime>> selector)
+        => EndQuery(await GetQuery().MinAsync(selector));
 
-	/// <inheritdoc/>
-	public async Task<int> Max(Expression<Func<TEnt, int>> selector)
-		=> EndQuery(await GetQuery().MaxAsync(selector));
+    /// <inheritdoc/>
+    public async Task<int> Max(Expression<Func<TEnt, int>> selector)
+        => EndQuery(await GetQuery().MaxAsync(selector));
 
-	/// <inheritdoc/>
-	public async Task<long> Max(Expression<Func<TEnt, long>> selector)
-		=> EndQuery(await GetQuery().MaxAsync(selector));
+    /// <inheritdoc/>
+    public async Task<long> Max(Expression<Func<TEnt, long>> selector)
+        => EndQuery(await GetQuery().MaxAsync(selector));
 
-	/// <inheritdoc/>
-	public async Task<double> Max(Expression<Func<TEnt, double>> selector)
-		=> EndQuery(await GetQuery().MaxAsync(selector));
+    /// <inheritdoc/>
+    public async Task<double> Max(Expression<Func<TEnt, double>> selector)
+        => EndQuery(await GetQuery().MaxAsync(selector));
 
-	/// <inheritdoc/>
-	public async Task<decimal> Max(Expression<Func<TEnt, decimal>> selector)
-		=> EndQuery(await GetQuery().MaxAsync(selector));
+    /// <inheritdoc/>
+    public async Task<decimal> Max(Expression<Func<TEnt, decimal>> selector)
+        => EndQuery(await GetQuery().MaxAsync(selector));
 
-	/// <inheritdoc/>
-	public async Task<DateTime> Max(Expression<Func<TEnt, DateTime>> selector)
-		=> EndQuery(await GetQuery().MaxAsync(selector));
+    /// <inheritdoc/>
+    public async Task<DateTime> Max(Expression<Func<TEnt, DateTime>> selector)
+        => EndQuery(await GetQuery().MaxAsync(selector));
 
-	/// <inheritdoc/>
-	public async Task<int> Sum(Expression<Func<TEnt, int>> selector)
-		=> EndQuery(await GetQuery().SumAsync(selector));
+    /// <inheritdoc/>
+    public async Task<int> Sum(Expression<Func<TEnt, int>> selector)
+        => EndQuery(await GetQuery().SumAsync(selector));
 
-	/// <inheritdoc/>
-	public async Task<long> Sum(Expression<Func<TEnt, long>> selector)
-		=> EndQuery(await GetQuery().SumAsync(selector));
+    /// <inheritdoc/>
+    public async Task<long> Sum(Expression<Func<TEnt, long>> selector)
+        => EndQuery(await GetQuery().SumAsync(selector));
 
-	/// <inheritdoc/>
-	public async Task<double> Sum(Expression<Func<TEnt, double>> selector)
-		=> EndQuery(await GetQuery().SumAsync(selector));
+    /// <inheritdoc/>
+    public async Task<double> Sum(Expression<Func<TEnt, double>> selector)
+        => EndQuery(await GetQuery().SumAsync(selector));
 
-	/// <inheritdoc/>
-	public async Task<decimal> Sum(Expression<Func<TEnt, decimal>> selector)
-		=> EndQuery(await GetQuery().SumAsync(selector));
+    /// <inheritdoc/>
+    public async Task<decimal> Sum(Expression<Func<TEnt, decimal>> selector)
+        => EndQuery(await GetQuery().SumAsync(selector));
 
-	/// <inheritdoc/>
-	public async Task<int> Insert(TEnt? ent)
+    /// <inheritdoc/>
+    public async Task<int> Insert(TEnt? ent)
     {
         if (ent == null) return 0;
 
@@ -226,12 +223,12 @@ public class DataRepository<TEnt>(DbContext context) : IRepository<TEnt>
     }
 
     /// <inheritdoc/>
-    public async Task<int> UpdateBy(string fields, params object[] values)
-        => EndQuery(Util.IsEmpty(fields) ? 0 : await GetQuery().ExecuteUpdateAsync(s => BuildSelector(s, fields, values)));
+    public async Task<int> UpdateBy(string field, object value)
+        => await UpdateBy(BuildSelector(field, value), value);
 
     /// <inheritdoc/>
-    public async Task<int> UpdateBy<TFld>(Expression<Func<TEnt, TFld>> selector, TFld value)
-        => EndQuery(await GetQuery().ExecuteUpdateAsync(s => s.SetProperty(selector.Compile(), value)));
+    public async Task<int> UpdateBy<TFld>(Expression<Func<TEnt, TFld>>? selector, TFld value)
+        => EndQuery(selector == null ? 0 : await GetQuery().ExecuteUpdateAsync(s => s.SetProperty(selector.Compile(), value)));
 
     /// <inheritdoc/>
     public async Task<int> Delete(bool firstOnly = false)
@@ -277,9 +274,9 @@ public class DataRepository<TEnt>(DbContext context) : IRepository<TEnt>
             _context.Update(ents);
         }
         else
-		{
-			_context.RemoveRange(ents);
-		}
+        {
+            _context.RemoveRange(ents);
+        }
 
         return await Commit();
     }
@@ -297,6 +294,10 @@ public class DataRepository<TEnt>(DbContext context) : IRepository<TEnt>
         => EndQuery(await GetQuery().FirstOrDefaultAsync());
 
     /// <inheritdoc/>
+    public async Task<TMap?> GetFirst<TMap>()
+        => EndQuery(await GetQuery().ProjectTo<TMap>(_mapper.ConfigurationProvider).FirstOrDefaultAsync());
+
+    /// <inheritdoc/>
     public async Task<List<TEnt>> GetList(int top = 0)
     {
         var query = GetQuery();
@@ -304,6 +305,16 @@ public class DataRepository<TEnt>(DbContext context) : IRepository<TEnt>
             query = query.Take(top);
 
         return EndQuery(await query.ToListAsync());
+    }
+
+    /// <inheritdoc/>
+    public async Task<List<TMap>> GetList<TMap>(int top = 0)
+    {
+        var query = GetQuery();
+        if (top > 0)
+            query = query.Take(top);
+
+        return EndQuery(await query.ProjectTo<TMap>(_mapper.ConfigurationProvider).ToListAsync());
     }
 
     /// <inheritdoc/>
@@ -316,6 +327,19 @@ public class DataRepository<TEnt>(DbContext context) : IRepository<TEnt>
             query = query.Skip(page * size).Take(size);
 
         var result = new Pagination<TEnt>(page, size, size > 0 ? await query.CountAsync() : 0, await query.ToArrayAsync());
+        return EndQuery(result);
+    }
+
+    /// <inheritdoc/>
+    public async Task<Pagination<TMap>> GetPaging<TMap>(int page = 0, int size = 15)
+    {
+        page = page < 1 ? 0 : page;
+        size = size < 1 ? 0 : size;
+        var query = GetQuery();
+        if (size > 0)
+            query = query.Skip(page * size).Take(size);
+
+        var result = new Pagination<TMap>(page, size, size > 0 ? await query.CountAsync() : 0, await query.ProjectTo<TMap>(_mapper.ConfigurationProvider).ToArrayAsync());
         return EndQuery(result);
     }
     #endregion
