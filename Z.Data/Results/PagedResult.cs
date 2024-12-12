@@ -15,13 +15,13 @@ public class PagedResult<T> : BaseResult, IResult<IEnumerable<T>>, IPagination
     public int TotalCount => _items?.TotalCount ?? 0;
 
     #region Overridens
-    IResult<IEnumerable<T>> IResult<IEnumerable<T>>.Ok(IEnumerable<T>? data, string message = "")
+    IResult<IEnumerable<T>> IResult<IEnumerable<T>>.Ok(IEnumerable<T>? data, string message)
         => Ok(data, message);
 
-    IResult<IEnumerable<T>> IResult<IEnumerable<T>>.Error(string message = "", HttpStatusCode code = HttpStatusCode.InternalServerError)
+    IResult<IEnumerable<T>> IResult<IEnumerable<T>>.Error(string message, HttpStatusCode code)
         => Error(message, code);
 
-    IResult<IEnumerable<T>> IResult<IEnumerable<T>>.Error(Exception exception, HttpStatusCode code = HttpStatusCode.InternalServerError)
+    IResult<IEnumerable<T>> IResult<IEnumerable<T>>.Error(Exception exception, HttpStatusCode code)
         => Error(exception.Message, code);
     #endregion
 

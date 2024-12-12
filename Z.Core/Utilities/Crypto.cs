@@ -9,7 +9,6 @@ namespace Z.Core.Utilities;
 public sealed class Crypto
 {
     #region Properties
-    private const string _charseeds = "UM7vgDhK1afd5ERrWs2tGHu3BwLYcmZ8jyn4pJFQz6bSBox9qCXTkeR0";
     private const string _cryptcode = "CB06cfE507a1";
 
     public static Crypter DES => new(1);
@@ -29,27 +28,12 @@ public sealed class Crypto
     public static Hasher SHA384 => new(3);
 
     public static Hasher SHA512 => new(5);
-
-    public static Encoder ASII => new(1);
-
-    public static Encoder UTF8 => new(2);
-
-    public static Encoder UNICODE => new(3);
-
-    public static Encoder BASE64 => new(4);
-
-    public static Encoder HEX => new(0);
-
-    public static Randomizer Random => new();
     #endregion
 
     public static string PasswordHash(string password, string? salt = "")
     {
-        if (!Util.IsEmpty(salt, true))
-            password += salt;
-
-        var result = MD5.Hash(password);
-        return result + _charseeds[result.Length % _charseeds.Length];
+        var result = MD5.Hash(password + salt ?? "");
+        return result + Randomize._charseeds[result.Length % Randomize._charseeds.Length];
     }
 
     public static bool IsPassword(string password, string hash, string? salt = "")
@@ -211,7 +195,7 @@ public sealed class Crypto
         /// <param name="text">input text to be hashed</param>
         /// <returns>hashed string</returns>
         private string ComputeHash(string text)
-            => Convert.ToBase64String(_algo.ComputeHash(UTF8.AsBytes(text)));
+            => Convert.ToBase64String(_algo.ComputeHash(Encoder.UTF8.AsBytes(text)));
 
         /// <summary>
         ///     returns the specific hashing alorithm
@@ -230,161 +214,6 @@ public sealed class Crypto
             };
         }
         #endregion
-    }
-    #endregion
-
-    #region Encode sub classes
-    public class Encoder
-    {
-        private readonly int _type;
-
-        internal Encoder(int type)
-        {
-            _type = type;
-        }
-
-        public byte[] AsBytes(string text)
-        {
-            if (Util.IsEmpty(text)) return [];
-
-            try
-            {
-                switch (_type)
-                {
-                    case 1: return Encoding.ASCII.GetBytes(text);
-                    case 2: return Encoding.UTF8.GetBytes(text);
-                    case 3: return Encoding.Unicode.GetBytes(text);
-                    case 4: return Convert.FromBase64String(text);
-                    default:
-                        var bytes = new byte[text.Length / 2];
-                        for (var i = 0; i < bytes.Length; i++)
-                        {
-                            bytes[i] = Convert.ToByte(text.Substring(i * 2, 2), 16);
-                        }
-                        return bytes;
-                }
-            }
-            catch { }
-
-            return [];
-        }
-
-        public string AsString(byte[]? bytes)
-        {
-            if (Util.IsEmpty(bytes)) return "";
-
-            try
-            {
-                return _type switch
-                {
-                    1 => Encoding.ASCII.GetString(bytes),
-                    2 => Encoding.UTF8.GetString(bytes),
-                    3 => Encoding.Unicode.GetString(bytes),
-                    4 => Convert.ToBase64String(bytes),
-                    _ => new(bytes.SelectMany(b => b.ToString("X2").ToCharArray()).ToArray()),
-                };
-            }
-            catch { }
-
-            return "";
-        }
-
-        public string Encode(string text, Encoding? encoding = null)
-            => Util.IsEmpty(text) ? "": AsString((encoding ?? Encoding.UTF8).GetBytes(text));
-
-        public string Decode(string text, Encoding? encoding = null)
-            => Util.IsEmpty(text) ? "" : (encoding ?? Encoding.UTF8).GetString(AsBytes(text));
-    }
-
-    public class Randomizer
-    {
-        private int _last = -1;
-
-        internal Randomizer()
-        { }
-
-        public byte[] NewBytes(int length)
-            => RandomNumberGenerator.GetBytes(length);
-
-        public int NewNumber(int min = int.MinValue, int max = int.MaxValue)
-        {
-            var result = _last;
-            while (result == _last)
-            {
-                result = RandomNumberGenerator.GetInt32(min, max);
-            }
-
-            return (_last = result);
-        }
-
-        public int NewNumber(int length = 1)
-        {
-            if (length < 1) return 0;
-
-            var result = _last;
-            var min = (int)Math.Pow(10, length - 1);
-            var max = (int)Math.Pow(10, length) - 1;
-            while (result == _last)
-            {
-                result = RandomNumberGenerator.GetInt32(min, max);
-            }
-
-            return result;
-        }
-
-        public char NewChar()
-            => _charseeds[NewNumber(0, _charseeds.Length)];
-
-        public string NewString(int length)
-        {
-            var sb = new StringBuilder();
-            while (sb.Length < length)
-            {
-                sb.Append(NewChar());
-            }
-
-            return sb.ToString();
-        }
-
-        public string Replace(string text, string replace)
-        {
-            if (Util.IsEmpty(text)) return "";
-            if (Util.IsEmpty(replace)) return text;
-
-            if (replace.Length > _charseeds.Length)
-            {
-                while (replace.Length > 0)
-                {
-                    if (replace.Length <= _charseeds.Length) return Replace(text, replace);
-                    
-                    text = Replace(text, replace[.._charseeds.Length]);
-                    replace = replace[_charseeds.Length..];
-                }
-            }
-
-            var num = NewNumber(0, _charseeds.Length);
-            var rands = _charseeds[(num - replace.Length < 0 ? 0 : num)..replace.Length];
-            for (var i = 0; i < replace.Length; i++)
-            {
-                text = text.Replace(replace[i], rands[i]);
-            }
-
-            return text;
-        }
-
-        public string NewGuid()
-        {
-            var code = Convert.ToBase64String(Guid.NewGuid().ToByteArray())[..^2];
-            foreach (char c in "+/")
-            {
-                if (code.Contains(c))
-                {
-                    code = code.Replace(c, NewChar());
-                }
-            }
-
-            return code;
-        }
     }
     #endregion
 }

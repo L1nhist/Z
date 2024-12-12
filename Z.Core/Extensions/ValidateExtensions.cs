@@ -186,23 +186,23 @@ public static class ValidateExtensions
         => eval.Eval(e => values.Any(v => e <= v));
     #endregion
 
-    #region Quantity Only
-    public static IEvaluator<T, Quantity> IsBetween<T>(this IEvaluator<T, Quantity> eval, Quantity min, Quantity max, bool equally = false)
+    #region value Only
+    public static IEvaluator<T, Sequence> IsBetween<T>(this IEvaluator<T, Sequence> eval, Sequence min, Sequence max, bool equally = false)
         => eval.Eval(e => min < e && e < max || equally && (e == min || e == max));
 
-    public static IEvaluator<T, Quantity> NotBetween<T>(this IEvaluator<T, Quantity> eval, Quantity min, Quantity max, bool equally = false)
+    public static IEvaluator<T, Sequence> NotBetween<T>(this IEvaluator<T, Sequence> eval, Sequence min, Sequence max, bool equally = false)
         => eval.Eval(e => min > e && e > max || equally && (e == min || e == max));
 
-    public static IEvaluator<T, Quantity> OverAny<T>(this IEvaluator<T, Quantity> eval, params Quantity[] values)
+    public static IEvaluator<T, Sequence> OverAny<T>(this IEvaluator<T, Sequence> eval, params Sequence[] values)
         => eval.Eval(e => values.Any(v => e > v));
 
-    public static IEvaluator<T, Quantity> OverOrEqualAny<T>(this IEvaluator<T, Quantity> eval, params Quantity[] values)
+    public static IEvaluator<T, Sequence> OverOrEqualAny<T>(this IEvaluator<T, Sequence> eval, params Sequence[] values)
         => eval.Eval(e => values.Any(v => e >= v));
 
-    public static IEvaluator<T, Quantity> UnderAny<T>(this IEvaluator<T, Quantity> eval, params Quantity[] values)
+    public static IEvaluator<T, Sequence> UnderAny<T>(this IEvaluator<T, Sequence> eval, params Sequence[] values)
         => eval.Eval(e => values.Any(v => e < v));
 
-    public static IEvaluator<T, Quantity> UnderOrEqualAny<T>(this IEvaluator<T, Quantity> eval, params Quantity[] values)
+    public static IEvaluator<T, Sequence> UnderOrEqualAny<T>(this IEvaluator<T, Sequence> eval, params Sequence[] values)
         => eval.Eval(e => values.Any(v => e <= v));
     #endregion
 

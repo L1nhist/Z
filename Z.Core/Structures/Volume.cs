@@ -1,50 +1,57 @@
 ﻿namespace Z.Core.Structures;
 
 [JsonConverter(typeof(VolumeJsonConverter))]
-public readonly struct Volume : IComparable, IComparable<decimal>, IEquatable<decimal>, IFormattable
+public readonly struct Volume
+    : IComparable, IFormattable, IComparable<decimal>, IEquatable<decimal>
 {
     #region Operators
     public static bool operator ==(Volume lft, Volume rgt)
-        => lft._volume == rgt._volume;
+        => lft._value == rgt._value;
 
     public static bool operator !=(Volume lft, Volume rgt)
-        => lft._volume != rgt._volume;
+        => lft._value != rgt._value;
 
     public static bool operator ==(Volume lft, decimal rgt)
-        => lft._volume == rgt;
+        => lft._value == rgt;
 
     public static bool operator !=(Volume lft, decimal rgt)
-        => lft._volume != rgt;
+        => lft._value != rgt;
 
     public static bool operator <(Volume lft, Volume rgt)
-        => lft._volume < rgt._volume;
+        => lft._value < rgt._value;
 
     public static bool operator >(Volume lft, Volume rgt)
-        => lft._volume > rgt._volume;
+        => lft._value > rgt._value;
 
     public static bool operator <=(Volume lft, Volume rgt)
-        => lft._volume <= rgt._volume;
+        => lft._value <= rgt._value;
 
     public static bool operator >=(Volume lft, Volume rgt)
-        => lft._volume >= rgt._volume;
+        => lft._value >= rgt._value;
 
     public static bool operator <(Volume lft, decimal rgt)
-        => lft._volume < rgt;
+        => lft._value < rgt;
 
     public static bool operator >(Volume lft, decimal rgt)
-        => lft._volume > rgt;
+        => lft._value > rgt;
 
     public static bool operator <=(Volume lft, decimal rgt)
-        => lft._volume <= rgt;
+        => lft._value <= rgt;
 
     public static bool operator >=(Volume lft, decimal rgt)
-        => lft._volume >= rgt;
+        => lft._value >= rgt;
+
+    public static Quantity operator *(Volume lft, decimal rgt)
+        => new(lft._value * rgt, lft.Precision);
+
+    public static Quantity operator *(Volume lft, Price rgt)
+        => new(lft._value * rgt, lft.Precision, rgt.Unit);
 
     public static implicit operator decimal(Volume value)
-        => value._volume;
+        => value._value;
 
-    public static implicit operator Volume(decimal volume)
-        => new(volume);
+    public static implicit operator Volume(decimal value)
+        => new(value);
     #endregion
 
     #region Properties
@@ -56,12 +63,12 @@ public readonly struct Volume : IComparable, IComparable<decimal>, IEquatable<de
     /// <summary>
     /// Initial value of this instance
     /// </summary>
-    private readonly decimal _volume;
+    private readonly decimal _value;
 
     /// <summary>
     /// Check whether value is empty or not
     /// </summary>
-    public bool IsEmpty => _volume == decimal.MinValue;
+    public bool IsEmpty => _value == decimal.MinValue;
 
     /// <summary>
     /// Precision number to be rounded
@@ -73,75 +80,57 @@ public readonly struct Volume : IComparable, IComparable<decimal>, IEquatable<de
     public Volume() : this(decimal.MinValue)
     { }
 
-    public Volume(decimal quantity, byte precision = 0)
+    public Volume(decimal value, byte precision = 0)
     {
-        _volume = precision > 0 ? Math.Round(quantity, precision) : quantity;
+        _value = precision > 0 ? Math.Round(value, precision) : value;
         Precision = precision;
     }
 
     public Volume(string? value)
     {
-        if (!Util.IsEmpty(value))
-        {
-            if (long.TryParse(value, out long quantity))
-            {
-                _volume = quantity;
-                var prs = value[^1] == '0' ? value.IndexOf('&') : 0;
-                Precision = (byte)(prs > 0 ? value.Length - prs - 1 : 0);
-                return;
-            }
-        }
-
-        _volume = decimal.MinValue;
-        Precision = 0;
+        var subs = (value?.Trim() ?? "").Split('e');
+        Precision = (subs.Length == 2 && byte.TryParse(subs[1], out byte prec)) ? prec : (byte)0;
+        _value = subs[0] != "" && decimal.TryParse(subs[0], out decimal price) ? price : 0;
     }
     #endregion
-
-    /// <summary>
-    /// Get format string based on precision number
-    /// </summary>
-    private string GetFormat()
-    {
-        var format = new StringBuilder("##.");
-        for (var i = 0; i < Precision; i++)
-        {
-            format.Append('0');
-        }
-
-        return format.ToString();
-    }
 
     #region Overridens
     /// <inheritdoc/>
     public int CompareTo(object? value)
-        => _volume.CompareTo(value);
+        => _value.CompareTo(value);
 
     /// <inheritdoc/>
     public int CompareTo(decimal value)
-        => _volume.CompareTo(Precision > 0 ? Math.Round(value, Precision) : value);
+        => _value.CompareTo(Precision > 0 ? Math.Round(value, Precision) : value);
 
     /// <inheritdoc/>
     public override bool Equals([NotNullWhen(true)] object? o)
-        => _volume.Equals(o);
+        => _value.Equals(o);
 
     /// <inheritdoc/>
     public bool Equals(decimal value)
-        => _volume.Equals(Precision > 0 ? Math.Round(value, Precision) : value);
+        => _value.Equals(Precision > 0 ? Math.Round(value, Precision) : value);
 
     /// <inheritdoc/>
     public override int GetHashCode()
-        => _volume.GetHashCode();
+        => _value.GetHashCode();
 
     /// <inheritdoc/>
     public override string ToString()
-        => Precision > 0? ToString(GetFormat()) : _volume.ToString();
+        => Precision > 0 ? $"{Math.Round(_value, Precision)}e{Precision}" : $"{_value}";
 
     /// <inheritdoc/>
     public string ToString(string? format)
-        => _volume.ToString(format);
+    {
+        var vol = Precision > 0 ? Math.Round(_value, Precision) : _value;
+        return $"{vol.ToString(format)}";
+    }
 
     /// <inheritdoc/>
     public string ToString(string? format, IFormatProvider? provider)
-        => _volume.ToString(format, provider);
+    {
+        var vol = Precision > 0 ? Math.Round(_value, Precision) : _value;
+        return $"{vol.ToString(format, provider)}";
+    }
     #endregion
 }

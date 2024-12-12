@@ -98,7 +98,7 @@ public static class ExpressionExtensions
             var props = obj.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
             if (Util.IsEmpty(names)) return props;
 
-            return props.Where(p => names.Any(n => n.Equals(p.Name, StringComparison.OrdinalIgnoreCase) || n.Equals($"-{p.Name}", StringComparison.OrdinalIgnoreCase))).ToArray();
+            return props.Where(p => names.Any(n => p.Name.Equals(n?.Replace("-", ""), StringComparison.OrdinalIgnoreCase))).ToArray();
         }
         catch { }
 
@@ -113,7 +113,7 @@ public static class ExpressionExtensions
             var props = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public);
             if (Util.IsEmpty(names)) return props;
 
-            return props.Where(p => names.Any(n => n.Equals(p.Name, StringComparison.OrdinalIgnoreCase) || n.Equals($"-{p.Name}", StringComparison.OrdinalIgnoreCase))).ToArray();
+            return props.Where(p => names.Any(n => p.Name.Equals(n?.Replace("-", ""), StringComparison.OrdinalIgnoreCase))).ToArray();
         }
         catch { }
 

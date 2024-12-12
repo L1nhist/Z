@@ -1,147 +1,157 @@
 ﻿namespace Z.Core.Structures;
 
-/// <summary>
-/// Strong type struct as a replacement for int or long structure
-/// using as quantity amount property of class
-/// </summary>
 [JsonConverter(typeof(QuantityJsonConverter))]
-public readonly struct Quantity : IComparable, IComparable<uint>, IEquatable<uint>, IComparable<ulong>, IEquatable<ulong>, IFormattable
+public readonly struct Quantity
+    : IComparable, IFormattable, IComparable<decimal>, IEquatable<decimal>
 {
     #region Operators
     public static bool operator ==(Quantity lft, Quantity rgt)
-        => lft._quantity == rgt._quantity;
+        => lft._value == rgt._value;
 
     public static bool operator !=(Quantity lft, Quantity rgt)
-        => lft._quantity != rgt._quantity;
+        => lft._value != rgt._value;
 
-    public static bool operator ==(Quantity lft, ulong rgt)
-        => lft._quantity == rgt;
+    public static bool operator ==(Quantity lft, decimal rgt)
+        => lft._value == rgt;
 
-    public static bool operator !=(Quantity lft, ulong rgt)
-        => lft._quantity != rgt;
-
-    public static bool operator ==(Quantity lft, uint rgt)
-        => lft._quantity == rgt;
-
-    public static bool operator !=(Quantity lft, uint rgt)
-        => lft._quantity != rgt;
+    public static bool operator !=(Quantity lft, decimal rgt)
+        => lft._value != rgt;
 
     public static bool operator <(Quantity lft, Quantity rgt)
-        => lft._quantity < rgt._quantity;
+        => lft._value < rgt._value;
 
     public static bool operator >(Quantity lft, Quantity rgt)
-        => lft._quantity > rgt._quantity;
+        => lft._value > rgt._value;
 
     public static bool operator <=(Quantity lft, Quantity rgt)
-        => lft._quantity <= rgt._quantity;
+        => lft._value <= rgt._value;
 
     public static bool operator >=(Quantity lft, Quantity rgt)
-        => lft._quantity >= rgt._quantity;
+        => lft._value >= rgt._value;
 
-    public static bool operator <(Quantity lft, uint rgt)
-        => lft._quantity < rgt;
+    public static bool operator <(Quantity lft, decimal rgt)
+        => lft._value < rgt;
 
-    public static bool operator >(Quantity lft, uint rgt)
-        => lft._quantity > rgt;
+    public static bool operator >(Quantity lft, decimal rgt)
+        => lft._value > rgt;
 
-    public static bool operator <=(Quantity lft, uint rgt)
-        => lft._quantity <= rgt;
+    public static bool operator <=(Quantity lft, decimal rgt)
+        => lft._value <= rgt;
 
-    public static bool operator >=(Quantity lft, uint rgt)
-        => lft._quantity >= rgt;
+    public static bool operator >=(Quantity lft, decimal rgt)
+        => lft._value >= rgt;
 
-    public static bool operator <(Quantity lft, ulong rgt)
-        => lft._quantity < rgt;
+    public static Price operator *(Quantity lft, decimal rgt)
+        => new(lft._value / rgt, lft.Precision, lft.Unit);
 
-    public static bool operator >(Quantity lft, ulong rgt)
-        => lft._quantity > rgt;
+    public static Price operator /(Quantity lft, Volume rgt)
+        => new(lft._value / (decimal)rgt, lft.Precision, lft.Unit);
 
-    public static bool operator <=(Quantity lft, ulong rgt)
-        => lft._quantity <= rgt;
+    public static Volume operator /(Quantity lft, Price rgt)
+        => new(lft._value / (decimal)rgt, lft.Precision);
 
-    public static bool operator >=(Quantity lft, ulong rgt)
-        => lft._quantity >= rgt;
+    public static implicit operator decimal(Quantity value)
+        => value._value;
 
-    public static implicit operator uint(Quantity value)
-        => value.IsEmpty || value._quantity > uint.MaxValue ? uint.MaxValue : (uint)value._quantity;
-
-    public static implicit operator Quantity(uint quantity)
-        => new(quantity);
-
-    public static implicit operator ulong(Quantity value)
-        => value._quantity;
-
-    public static implicit operator Quantity(ulong quantity)
-        => new(quantity);
+    public static implicit operator Quantity(decimal value)
+        => new(value);
     #endregion
 
     #region Properties
     /// <summary>
     /// Represent as an empty value
     /// </summary>
-    public static readonly Quantity Empty = new(0);
+    public static readonly Quantity Empty = new(decimal.MinValue);
 
     /// <summary>
     /// Initial value of this instance
     /// </summary>
-    private readonly ulong _quantity;
+    private readonly decimal _value;
 
     /// <summary>
     /// Check whether value is empty or not
     /// </summary>
-    public bool IsEmpty => _quantity == 0;
+    public bool IsEmpty => _value == decimal.MinValue;
+
+    /// <summary>
+    /// Precision number to be rounded
+    /// </summary>
+    public byte Precision { get; }
+
+    /// <summary>
+    /// Name of the currency unit
+    /// </summary>
+    public string Unit { get; }
     #endregion
 
     #region Constructions
-    public Quantity(uint quantity)
-        => _quantity = quantity;
+    public Quantity(decimal value, string? unit = "")
+    {
+        _value = value;
+        Precision = 0;
+        Unit = unit ?? "";
+    }
 
-    public Quantity(ulong quantity)
-        => _quantity = quantity;
+    public Quantity(decimal value, byte precision, string? unit = "")
+    {
+        _value = precision > 0 ? Math.Round(value, precision) : value;
+        Precision = precision;
+        Unit = unit ?? "";
+    }
 
     public Quantity(string? value)
-        => _quantity = !Util.IsEmpty(value) && ulong.TryParse(value, out ulong quantity) ? quantity : ulong.MinValue;
+    {
+        var parts = (value?.Trim() ?? "").Split('$');
+        Unit = parts.Length == 2 ? parts[1].Trim() : "";
+
+        var subs = parts[0].Split('e');
+        Precision = (subs.Length == 2 && byte.TryParse(subs[1], out byte prec)) ? prec : (byte)0;
+        _value = subs[0] != "" && decimal.TryParse(subs[0], out decimal price) ? price : 0;
+    }
     #endregion
 
     #region Overridens
     /// <inheritdoc/>
     public int CompareTo(object? value)
-        => _quantity.CompareTo(value);
+        => _value.CompareTo(value);
 
     /// <inheritdoc/>
-    public int CompareTo(uint value)
-        => _quantity.CompareTo(value);
-
-    /// <inheritdoc/>
-    public int CompareTo(ulong value)
-        => _quantity.CompareTo(value);
+    public int CompareTo(decimal value)
+        => _value.CompareTo(Precision > 0 ? Math.Round(value, Precision) : value);
 
     /// <inheritdoc/>
     public override bool Equals([NotNullWhen(true)] object? o)
-        => _quantity.Equals(o);
+        => _value.Equals(o);
 
     /// <inheritdoc/>
-    public bool Equals(uint value)
-        => _quantity.Equals(value);
-
-    /// <inheritdoc/>
-    public bool Equals(ulong value)
-        => _quantity.Equals(value);
+    public bool Equals(decimal value)
+        => _value.Equals(Precision > 0 ? Math.Round(value, Precision) : value);
 
     /// <inheritdoc/>
     public override int GetHashCode()
-        => _quantity.GetHashCode();
+        => _value.GetHashCode();
 
     /// <inheritdoc/>
     public override string ToString()
-        => _quantity.ToString();
+    {
+        var unit = Unit == "" ? "" : $"${Unit}";
+        return Precision > 0 ? $"{Math.Round(_value, Precision)}e{Precision}{unit}" : $"{_value}{unit}";
+    }
 
     /// <inheritdoc/>
     public string ToString(string? format)
-        => _quantity.ToString(format);
+    {
+        var unit = Unit == "" ? "" : $"${Unit}";
+        var price = Precision > 0 ? Math.Round(_value, Precision) : _value;
+        return $"{price.ToString(format)}{unit}";
+    }
 
     /// <inheritdoc/>
     public string ToString(string? format, IFormatProvider? provider)
-        => _quantity.ToString(format, provider);
+    {
+        var unit = Unit == "" ? "" : $"${Unit}";
+        var price = Precision > 0 ? Math.Round(_value, Precision) : _value;
+        return $"{price.ToString(format, provider)}{unit}";
+    }
     #endregion
 }

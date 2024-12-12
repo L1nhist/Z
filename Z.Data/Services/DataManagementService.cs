@@ -157,13 +157,13 @@ public class DataManagementService<T> : IDataManagementService<T>
         }
     }
 
-    public virtual async Task<ValidResult<T>> Validate<TReq>(TReq? request)
+    public virtual Task<ValidResult<T>> Validate<TReq>(TReq? request)
     {
         var valid = new ValidResult<T>();
-        if (Util.IsEmpty(request)) return valid.BadRequest("Requested data can not be mapped as usual");
+        if (Util.IsEmpty(request)) return Task.FromResult(valid.BadRequest("Requested data can not be mapped as usual"));
 
         var ent = Mapper.Map<T>(request);
-        return valid.IsValid(ent, "Can not find specific data");
+        return Task.FromResult(valid.IsValid(ent, "Can not find specific data"));
     }
 
     public void WriteLog(string? msg = "")

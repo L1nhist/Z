@@ -59,7 +59,7 @@ public readonly struct Uuid : IComparable, IComparable<Guid>, IEquatable<Guid>, 
     /// Initiate a new instant of Guid value that can be converted to
     /// a BASE64 string without any special characters (+,/)
     /// </summary>
-    public static Uuid NewCode => new(Crypto.Random.NewGuid());
+    public static Uuid NewCode => new(Randomize.NewGuid());
 
     /// <summary>
     /// Try parse a string to Guid with or without format or culture provider

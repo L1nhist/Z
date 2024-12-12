@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Workplace\\Projects\\Z\\Z.Core\\Z.Core.csproj": {}
+    "C:\\Working\\Projects\\Z\\Z.Core\\Z.Core.csproj": {}
   },
   "projects": {
-    "C:\\Workplace\\Projects\\Z\\Z.Core\\Z.Core.csproj": {
+    "C:\\Working\\Projects\\Z\\Z.Core\\Z.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Workplace\\Projects\\Z\\Z.Core\\Z.Core.csproj",
+        "projectUniqueName": "C:\\Working\\Projects\\Z\\Z.Core\\Z.Core.csproj",
         "projectName": "Z.Core",
-        "projectPath": "C:\\Workplace\\Projects\\Z\\Z.Core\\Z.Core.csproj",
+        "projectPath": "C:\\Working\\Projects\\Z\\Z.Core\\Z.Core.csproj",
         "packagesPath": "C:\\Users\\linhi\\.nuget\\packages\\",
-        "outputPath": "C:\\Workplace\\Projects\\Z\\Z.Core\\obj\\",
+        "outputPath": "C:\\Working\\Projects\\Z\\Z.Core\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -26,7 +26,6 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -50,6 +49,12 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.11, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",

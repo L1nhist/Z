@@ -1,50 +1,57 @@
 ﻿namespace Z.Core.Structures;
 
 [JsonConverter(typeof(PriceJsonConverter))]
-public readonly struct Price : IComparable, IComparable<decimal>, IEquatable<decimal>, IFormattable
+public readonly struct Price
+    : IComparable, IFormattable, IComparable<decimal>, IEquatable<decimal>
 {
     #region Operators
     public static bool operator ==(Price lft, Price rgt)
-        => lft._price == rgt._price;
+        => lft._value == rgt._value;
 
     public static bool operator !=(Price lft, Price rgt)
-        => lft._price != rgt._price;
+        => lft._value != rgt._value;
 
     public static bool operator ==(Price lft, decimal rgt)
-        => lft._price == rgt;
+        => lft._value == rgt;
 
     public static bool operator !=(Price lft, decimal rgt)
-        => lft._price != rgt;
+        => lft._value != rgt;
 
     public static bool operator <(Price lft, Price rgt)
-        => lft._price < rgt._price;
+        => lft._value < rgt._value;
 
     public static bool operator >(Price lft, Price rgt)
-        => lft._price > rgt._price;
+        => lft._value > rgt._value;
 
     public static bool operator <=(Price lft, Price rgt)
-        => lft._price <= rgt._price;
+        => lft._value <= rgt._value;
 
     public static bool operator >=(Price lft, Price rgt)
-        => lft._price >= rgt._price;
+        => lft._value >= rgt._value;
 
     public static bool operator <(Price lft, decimal rgt)
-        => lft._price < rgt;
+        => lft._value < rgt;
 
     public static bool operator >(Price lft, decimal rgt)
-        => lft._price > rgt;
+        => lft._value > rgt;
 
     public static bool operator <=(Price lft, decimal rgt)
-        => lft._price <= rgt;
+        => lft._value <= rgt;
 
     public static bool operator >=(Price lft, decimal rgt)
-        => lft._price >= rgt;
+        => lft._value >= rgt;
+
+    public static Quantity operator *(Price lft, decimal rgt)
+        => new(lft._value * rgt, lft.Precision, lft.Unit);
+
+    public static Quantity operator *(Price lft, Volume rgt)
+        => new(lft._value * rgt, lft.Precision, lft.Unit);
 
     public static implicit operator decimal(Price value)
-        => value._price;
+        => value._value;
 
-    public static implicit operator Price(decimal price)
-        => new(price);
+    public static implicit operator Price(decimal value)
+        => new(value);
     #endregion
 
     #region Properties
@@ -56,12 +63,12 @@ public readonly struct Price : IComparable, IComparable<decimal>, IEquatable<dec
     /// <summary>
     /// Initial value of this instance
     /// </summary>
-    private readonly decimal _price;
+    private readonly decimal _value;
 
     /// <summary>
     /// Check whether value is empty or not
     /// </summary>
-    public bool IsEmpty => _price == decimal.MinValue;
+    public bool IsEmpty => _value == decimal.MinValue;
 
     /// <summary>
     /// Precision number to be rounded
@@ -75,86 +82,73 @@ public readonly struct Price : IComparable, IComparable<decimal>, IEquatable<dec
     #endregion
 
     #region Constructions
-    public Price(decimal price, string? unit = "")
+    public Price(decimal value, string? unit = "")
     {
-        _price = price;
+        _value = value;
         Precision = 0;
         Unit = unit ?? "";
     }
 
-    public Price(decimal price, byte precision, string? unit = "")
+    public Price(decimal value, byte precision, string? unit = "")
     {
-        _price = precision > 0 ? Math.Round(price, precision) : price;
+        _value = precision > 0 ? Math.Round(value, precision) : value;
         Precision = precision;
         Unit = unit ?? "";
     }
 
     public Price(string? value)
     {
-        if (!Util.IsEmpty(value))
-        {
-            var vals = value.Trim().Split(' ');
-            if (!Util.IsEmpty(vals[0]) && long.TryParse(vals[0], out long price))
-            {
-                _price = price;
-                var prs = vals[0][^1] == '0' ? vals[0].IndexOf('&') : 0;
-                Precision = (byte)(prs > 0 ? vals[0].Length - prs - 1 : 0);
-                Unit = vals.Length > 1 ? vals[1] : "";
-                return;
-            }
-        }
+        var parts = (value?.Trim() ?? "").Split('$');
+        Unit = parts.Length == 2 ? parts[1].Trim() : "";
 
-        _price = decimal.MinValue;
-        Precision = 0;
-        Unit = "";
+        var subs = parts[0].Split('e');
+        Precision = (subs.Length == 2 && byte.TryParse(subs[1], out byte prec)) ? prec : (byte)0;
+        _value = subs[0] != "" && decimal.TryParse(subs[0], out decimal price) ? price : 0;
     }
     #endregion
-
-    /// <summary>
-    /// Get format string based on precision number
-    /// </summary>
-    private string GetFormat()
-    {
-        var format = new StringBuilder("##.");
-        for (var i = 0; i < Precision; i++)
-        {
-            format.Append('0');
-        }
-
-        return format.ToString();
-    }
 
     #region Overridens
     /// <inheritdoc/>
     public int CompareTo(object? value)
-        => _price.CompareTo(value);
+        => _value.CompareTo(value);
 
     /// <inheritdoc/>
     public int CompareTo(decimal value)
-        => _price.CompareTo(Precision > 0 ? Math.Round(value, Precision) : value);
+        => _value.CompareTo(Precision > 0 ? Math.Round(value, Precision) : value);
 
     /// <inheritdoc/>
     public override bool Equals([NotNullWhen(true)] object? o)
-        => _price.Equals(o);
+        => _value.Equals(o);
 
     /// <inheritdoc/>
     public bool Equals(decimal value)
-        => _price.Equals(Precision > 0 ? Math.Round(value, Precision) : value);
+        => _value.Equals(Precision > 0 ? Math.Round(value, Precision) : value);
 
     /// <inheritdoc/>
     public override int GetHashCode()
-        => _price.GetHashCode();
+        => _value.GetHashCode();
 
     /// <inheritdoc/>
     public override string ToString()
-        => Precision > 0 ? ToString(GetFormat()) : $"{_price} {Unit}";
+    {
+        var unit = Unit == "" ? "" : $"${Unit}";
+        return Precision > 0 ? $"{Math.Round(_value, Precision)}e{Precision}{unit}" : $"{_value}{unit}";
+    }
 
     /// <inheritdoc/>
     public string ToString(string? format)
-        => $"{_price.ToString(format)} {Unit}";
+    {
+        var unit = Unit == "" ? "" : $"${Unit}";
+        var price = Precision > 0 ? Math.Round(_value, Precision) : _value;
+        return $"{price.ToString(format)}{unit}";
+    }
 
     /// <inheritdoc/>
     public string ToString(string? format, IFormatProvider? provider)
-        => $"{_price.ToString(format, provider)} {Unit}";
+    {
+        var unit = Unit == "" ? "" : $"${Unit}";
+        var price = Precision > 0 ? Math.Round(_value, Precision) : _value;
+        return $"{price.ToString(format, provider)}{unit}";
+    }
     #endregion
 }

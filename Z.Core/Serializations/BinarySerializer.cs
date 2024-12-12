@@ -228,9 +228,9 @@ public class BinarySerializer<T> : ISerializer<T, byte[]>
             prop.SetValue(result, new Price(prc, unit));
             return true;
         }
-        else if (prop.PropertyType.IsInstanceOfType(typeof(Quantity)))
+        else if (prop.PropertyType.IsInstanceOfType(typeof(Sequence)))
         {
-            prop.SetValue(result, new Quantity(ReadULong(span)));
+            prop.SetValue(result, new Sequence(ReadULong(span)));
             len = 8;
             return true;
         }
@@ -306,7 +306,7 @@ public class BinarySerializer<T> : ISerializer<T, byte[]>
             foreach (var p in props)
             {
                 var v = p.GetValue(value);
-                if (value == null)
+                if (v == null)
                 {
                     strm.Write(NulSeparator);
                     continue;
@@ -383,21 +383,33 @@ public class BinarySerializer<T> : ISerializer<T, byte[]>
             return true;
         }
 
-        if (value is Price price)
+        if (value is Price prc)
         {
-            WriteDecimal(strm, price);
-            if (!Util.IsEmpty(price.Unit))
+            WriteDecimal(strm, prc);
+            if (!Util.IsEmpty(prc.Unit))
             {
                 WriteChar(strm, '$');
-                WriteString(strm, price.Unit);
+                WriteString(strm, prc.Unit);
             }
 
             return true;
         }
 
-        if (value is Quantity quant)
+        if (value is Quantity qut)
         {
-            WriteLong(strm, quant);
+            WriteDecimal(strm, qut);
+            if (!Util.IsEmpty(qut.Unit))
+            {
+                WriteChar(strm, '$');
+                WriteString(strm, qut.Unit);
+            }
+
+            return true;
+        }
+
+        if (value is Sequence seq)
+        {
+            WriteLong(strm, seq);
             return true;
         }
 

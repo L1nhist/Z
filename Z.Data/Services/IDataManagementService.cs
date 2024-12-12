@@ -36,9 +36,6 @@ public interface IDataManagementService<T>
 public interface IDataManagementService<TEnt, TId> : IDataManagementService<TEnt>
     where TEnt : class, IEntity<TId>
 {
-    Task<IResult<TId>> Create<TReq>(TReq request)
-        where TReq : IRequest;
-
     Task<IResult> Update<TReq>(TId id, TReq request)
         where TReq : IRequest;
 

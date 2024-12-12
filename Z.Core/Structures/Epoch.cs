@@ -1,7 +1,8 @@
 ﻿namespace Z.Core.Structures;
 
 [JsonConverter(typeof(EpochJsonConverter))]
-public readonly struct Epoch : IComparable, IComparable<long>, IEquatable<long>, IComparable<DateTime>, IEquatable<DateTime>, IFormattable
+public readonly struct Epoch
+    : IComparable, IFormattable, IComparable<long>, IEquatable<long>, IComparable<DateTime>, IEquatable<DateTime>
 {
     #region Operators
     public static bool operator ==(Epoch lft, Epoch rgt)

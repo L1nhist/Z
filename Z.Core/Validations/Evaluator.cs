@@ -142,7 +142,15 @@ public class Evaluator<TVal, TFld> : IEvaluator<TVal, TFld>, IEquatable<bool>
         => Eval(e => values.Any(v => Util.IsContains(e, v, false, false)));
 
     /// <inheritdoc/>
+    public override bool Equals(object? value)
+        => value != null && _error.Equals(value);
+
+    /// <inheritdoc/>
     public bool Equals(bool value)
         => _error.Equals(value);
+
+    /// <inheritdoc/>
+    public override int GetHashCode()
+        => _error.GetHashCode();
     #endregion
 }

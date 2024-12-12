@@ -2,7 +2,7 @@
 
 public interface IMomentable
 {
-    Epoch CreatedAt { get; set; }
+    long? CreatedAt { get; set; }
 
-    Epoch ModifiedAt { get; set; }
+    long? ModifiedAt { get; set; }
 }
